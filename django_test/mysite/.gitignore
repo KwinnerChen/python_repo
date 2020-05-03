@@ -1,0 +1,5 @@
+**/__pycache__
+db.sqlite3
+/mysite/__init__.py
+test.py
+.idea/

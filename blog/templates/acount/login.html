@@ -1,0 +1,27 @@
+{% extends "base.html" %} 
+
+{% block title %} Login {% endblock %}
+
+{% block content %}
+<div class="row text-center vertical-middle-sm">
+    <h1>Login</h1>
+    {% if user.is_authenticated %}
+    <p>您已登陆，请继续其他操作！</p>
+    {% else %}
+    <p>Input your suername and passwrld</p>
+    <form class="form-horizontal" action="." method="POST">
+        {% csrf_token %}
+        <!--{{ form.as_p }}--><!--使用内置样式-->
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}" class="col-md-5 control-label">Username</label>
+            <div class="col-md-text-6 text-left">{{ form.username }}</div>
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}" class="col-md-5 control-label">Password</label>
+            <div class="col-md-text-6 text-left">{{ form.password }}</div>
+        </div>
+        <input type="submit" value="login">
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

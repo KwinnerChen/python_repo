@@ -1,0 +1,22 @@
+{% load static %}
+<div class="container">
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="http://localhost:8000/blog">
+            <img src="{% static '/images/timg.jpeg' %}" width="50px"></a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav" role="navigation">
+                <li> <a href="{% url 'blog_title' %}">BLOG</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" style="margin-right:10px">
+                {% if user.is_authenticated %}
+                <li><a href="#">{{ user.username }}</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                <li> <a href="{% url 'login' %}">LOGIN</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+</div>

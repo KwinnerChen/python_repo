@@ -1,0 +1,18 @@
+<h1>{{ question.questions_text }}</h1>
+
+{% if error_message %}
+    <p><strong> {{error_message }}</strong></p>
+{% endif %}
+
+<form action="{% url 'polls:vote' question.id %}" method="POST">
+    <!--csrf_token为django内置功能暂时无需自己解决-->
+    {% csrf_token %}
+    {% for choice in choices %}
+        <input type="radio" name="choice" id="choice{{forloop.counter}}" value="{{ choice.id }}">
+        <label for="choice{{ forloop.counter }}">
+            {{ choice.choice_text }}
+        </label><br>
+    {% endfor %}
+
+    <input type="submit" value="Vote">
+</form>
