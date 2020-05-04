@@ -28,5 +28,5 @@ def mergesort(seq):
 
 
 if __name__ == '__main__':
-    dtime = main(mergesort, seq_len=10000)
+    dtime = main(mergesort, seq_len=10)
     print(f"耗时：{dtime}")
