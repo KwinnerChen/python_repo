@@ -18,12 +18,17 @@ def main(fn, seq_len=20, rand=(0, 999, 2)):
     :rand: 一个三元组，随机参数（start, stop, step)
     """
 
-    query = [random.randrange(*rand) for i in range(seq_len)]
-    print(f"原始列表是：{query}")
+    seq = [random.randrange(*rand) for i in range(seq_len)]
+    print(f"原始列表是：{seq}")
     print("\n")
-    time1 = time.time()
-    query = fn(query)
-    time2 = time.time()
-    print(f"升序排序后：{query}")
+    if fn.__code__.co_argcount == 1:
+        time1 = time.time()
+        seq = fn(seq)
+        time2 = time.time()
+    elif fn.__code__.co_argcount == 2:
+        time1 = time.time()
+        seq = fn(seq, len(seq)-1)
+        time2 = time.time()
+    print(f"升序排序后：{seq}")
     return time2 - time1
     
