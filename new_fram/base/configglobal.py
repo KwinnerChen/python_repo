@@ -35,11 +35,17 @@ STORAGE_CONFIG = {
     # 'tablename': '',
 # }
 
+QUEUE_MODUL = 'base.queues.rabbitmq'
+
 # 队列地址
-QUEUE_ADDRESS = {
-    'host': 'localhost',
-    'port': 10000,
-    'authkey':b'spider',
+QUEUE_CONFIG = {
+    # 'host': 'localhost',
+    # 'port': 10000,
+    # 'authkey':b'spider',
+    'host': '192.168.3.30',
+    'port': 5672,
+    'username': 'admin',
+    'password': 'admin',
 }
 
 # 下载延时，针对线程
