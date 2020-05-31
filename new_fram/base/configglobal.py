@@ -35,7 +35,7 @@ STORAGE_CONFIG = {
     # 'tablename': '',
 # }
 
-QUEUE_MODUL = 'base.queues.rabbitmq'
+QUEUE_MODUL = 'base.queues.Rabbitmq'
 
 # 队列地址
 QUEUE_CONFIG = {
@@ -45,7 +45,7 @@ QUEUE_CONFIG = {
     'host': '192.168.3.30',
     'port': 5672,
     'username': 'admin',
-    'password': 'admin',
+    'password': '880326',
 }
 
 # 下载延时，针对线程

@@ -19,6 +19,7 @@ class BaseSpider(abc.ABC):
     start_urls = []
 
     def start_request(self):
+        assert self.start_urls, "若没有重新定义start_request方法，则必须定义start_urls类变量！"
         for url in self.start_urls:
             yield Task(url=url, callback=self.response_parser)
     

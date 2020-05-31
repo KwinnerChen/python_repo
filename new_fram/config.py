@@ -25,12 +25,14 @@ STORAGE_CONFIG = {
     'db': 'test_learn',
 }
 
-
-## 队列地址配置，默认使用本地队列
+# # 队列模块
+# QUEUE_MODUL = 'base.queues.Rabbitmq'
+# # 队列地址配置，默认使用本地队列
 # QUEUE_ADDRESS = {
-#     'host': 'localhost',
-#     'port': 10000,
-#     'authkey':b'spider',
+#     'host': '192.168.3.30',
+#     'port': 5672,
+#     'username': 'admin',
+#     'password': 'admin'
 # }
 
 

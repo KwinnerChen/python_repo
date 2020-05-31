@@ -15,7 +15,7 @@ def get_storager():
         Storager = getattr(storager_module, name)
         return Storager(Config.STORAGE_CONFIG)
     else:
-        raise AttributeError("%s 声明的对象并未定义!")
+        raise AttributeError("%s 声明的对象并未定义!" % name)
 
 
 def get_queue(queue_name):
@@ -26,4 +26,5 @@ def get_queue(queue_name):
         queue_modul = import_module(package)
         Queue = getattr(queue_modul, name)
         return Queue(Config.QUEUE_CONFIG, queue_name)
-        
+    else:
+        raise AttributeError("%s 声明的对象并未定义!" % name)
