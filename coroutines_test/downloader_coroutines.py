@@ -3,7 +3,6 @@
 
 
 import requests
-from collections import deque
 import asyncio
 from queue import Queue
 import time
@@ -26,8 +25,9 @@ import time
 
 
 async def downloader(url):
-    resp = requests.get(url)
-    return resp
+    loop = asyncio.get_event_loop()
+    r = await loop.run_in_executor(None, requests.get, url)
+    return r
 
 
 def downloader_ord(url):
@@ -38,24 +38,32 @@ async def worker(q_task):
     while True:
         if q_task.empty():
             continue
-        url = q_task.get()
+        url = await q_task.get()
         print('get %s' % url)
         if url is None:
             break
         resp = await downloader(url)
         print(resp.text[:100])
         print()
+        q_task.task_done()
 
 
 async def main(coro_num):
-    q_task = Queue()
-    for url in ('http://www.baidu.com',) * 20:
-        q_task.put(url)
-    for i in range(coro_num):
-        q_task.put(None)
-    for i in range(coro_num):
+    coros = []
+
+    q_task = asyncio.Queue()
+
+    for url in ('http://www.baidu.com',) * 50:
+        await q_task.put(url)
+    
+    for _ in range(coro_num):
+        await q_task.put(None)
+
+    for _ in range(coro_num):
         task1 = asyncio.create_task(worker(q_task))
-        await task1
+        coros.append(task1)
+
+    await asyncio.gather(*coros)
 
 
 def main_ord():
@@ -87,7 +95,7 @@ if __name__ == '__main__':
     # gen.close()
     # print(result)
     ts = time.time()
-    asyncio.run(main(1))
+    asyncio.run(main(6))
     # main_ord()
     te = time.time()
     print('耗时：%.2e s' % (te-ts))
