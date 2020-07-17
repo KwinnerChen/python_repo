@@ -54,5 +54,19 @@ def main(address='127.0.0.1', port=2323):
     loop.close()
 
 
+async def main2(address='127.0.0.1', port=2323):
+    port = int(port)
+    server = await asyncio.start_server(handle_queries, address, port)
+    host = server.sockets[0].getsockname()
+    print("Serving on {}. Hit CTRL-C to stop.".format(host))
+    try:
+        await server.serve_forever()
+    except:
+        pass
+    print("server shutting down.")
+    server.close()
+
+
 if __name__ == '__main__':
-    main(*sys.argv[1:])
+    # main(*sys.argv[1:])
+    asyncio.run(main2(*sys.argv[1:]))
