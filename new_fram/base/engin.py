@@ -6,11 +6,10 @@
 __author__ = "Kwinner Chen"
 
 
-import config
+from base.configmodul import Config
 from time import sleep
 from base import Task, Item
 from threading import Thread
-from storageconf import StorageType
 
 
 class Engin:
