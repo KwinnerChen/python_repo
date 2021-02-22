@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from base.configmodul import Config
+from .configmodul import Config
 from importlib import import_module
 
 

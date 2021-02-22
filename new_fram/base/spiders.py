@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
+#TODO:编写爬虫类的元类，检查定义爬虫类时，必须定义的属性是否已经定义
 
-import sys, os
-sys.path.append(os.getcwd())
-from base.task import Task
+
+from .task import Task
 import abc
 
 

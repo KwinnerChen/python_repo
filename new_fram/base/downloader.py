@@ -6,7 +6,7 @@ __author__ = 'Kwinner Chen'
 
 
 import requests
-from base.configmodul import Config
+from .configmodul import Config
 
 
 class Donlowder:
