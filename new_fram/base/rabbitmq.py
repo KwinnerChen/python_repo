@@ -1,6 +1,6 @@
 #! usr/bin/env python3
 # -*- coding: utf-8 -*-
-# TODO:考虑如何和系统融合，细节打磨
+# 该模块和整体框架无关
 
 
 from time import sleep

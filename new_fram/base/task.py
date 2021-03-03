@@ -13,13 +13,12 @@ class Task:
     :delayitem: 存放缓存，用于多步解析的item
     :kwargs: 该参数将传递给下载器
     '''
-    def __init__(self, url=None, method='get', callback=None, times=0, delayitem=None, **kwargs):
+    def __init__(self, url, *, method='get', callback=None, times=0, delayitem=None, **kwargs):
         self.url = url
         self.method = method
         self.callback = callback
         self.times = times
         self.delayitem = delayitem
-        self.response = None
         self.kwargs = kwargs
         # for k,v in kwargs.items():
         #     self.__setattr__(k, v)

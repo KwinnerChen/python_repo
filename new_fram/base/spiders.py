@@ -7,7 +7,18 @@ from .task import Task
 import abc
 
 
-class BaseSpider(abc.ABC):
+class SpiderMeta(type):
+    """
+    爬虫类的元类，对每个爬虫类的定义进行检查，防止必须定义的属性没被定义
+    """
+    def __new__(cls, names, attr_dict):
+        if 'name' not in attr_dict:
+            raise KeyError("类参数 name 是必须定义的，它是用以区别爬虫类的唯一标志！")
+        elif "name" == "":
+            raise KeyError("类参数 name 应该定义为有意义且唯一的，否则无法用于区分不同的爬虫类！")
+
+
+class BaseSpider(abc.ABC, metaclass=SpiderMeta):
     '''
     爬虫类的基类
     :params:
@@ -18,11 +29,17 @@ class BaseSpider(abc.ABC):
     name = ''
     start_urls = []
 
+    def __init__(self) -> None:
+        self.init()
+
+    def init(self):
+        pass
+
     def start_request(self):
         assert self.start_urls, "若没有重新定义start_request方法，则必须定义start_urls类变量！"
         for url in self.start_urls:
             yield Task(url=url, callback=self.response_parser)
     
     @abc.abstractmethod
-    def response_parser(self, response, item):
+    def response_parser(self, response):
         pass

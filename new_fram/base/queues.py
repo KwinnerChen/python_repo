@@ -24,8 +24,8 @@ class QueueBase(abc.ABC):
         for k, v in configdict.value.items():
             setattr(self, k, v)
         Lock.acquire()
-        if cls.connection is None:
-            self.connect()
+        if cls.connection is None or cls.connection.is_closed:
+            cls.connection = self.connect()
         Lock.release()
 
 
@@ -59,28 +59,27 @@ class Rabbitmq(QueueBase):
     # 因为链接对象是单例模式
     # 只有在没有链接对象，或者链接关闭的情况下才
     def connect(self):
-        cls = self.__class__
-        if cls.connection is None or cls.connection.is_closed:
-            cred = pika.PlainCredentials(self.username, self.password)
-            con_params = pika.ConnectionParameters(host=self.host, port=self.port, 
-                                                        virtual_host='/', credentials=cred)
-            cls.connection = pika.BlockingConnection(con_params)
-        return cls.connection
+        cred = pika.PlainCredentials(self.username, self.password)
+        con_params = pika.ConnectionParameters(host=self.host, port=self.port, 
+                                                    virtual_host='/', credentials=cred)
+        connection = pika.BlockingConnection(con_params)
+        return connection
               
     # rabbitmq的链接对象是非线程安全的
     # 保持单个链接对象是可以开通多个频道与之通信
     @property
     def get_channel(self):
         if self.channel is None or self.channel.is_closed:
-            Lock.acquire()
-            connection = self.connect()
-            Lock.release()
-            channel = connection.channel()
-            # 声明每次只获取一条消息
-            channel.basic_qos(prefetch_count=1)
-            # 声明队列永久化
-            channel.queue_declare(self.queue_name, durable=True)
-            self.channel = channel
+            if self.connection.is_closed:
+                Lock.acquire()
+                self.connection = self.connect()
+                channel = self.connection.channel()
+                Lock.release()
+                # 声明每次只获取一条消息
+                channel.basic_qos(prefetch_count=1)
+                # 声明队列永久化
+                channel.queue_declare(self.queue_name, durable=True)
+                self.channel = channel
         return self.channel
 
     # 从rabbitmq队列中获取一条消息

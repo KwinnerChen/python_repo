@@ -1,13 +1,11 @@
+"""全局配置参数，所有可配置参数都列在这里。字段被解析为Config类对象，每个字段对应一个类属性，
+   属性值为字段值。根目录下可以有单独配置文件，文件中列出的字段将覆盖默认字段。
+"""
+
 import os
 
-# 下载线程数
-DOWNLOAD_THREAD_NUM = 1
-
-# 解析线程数
-PARSER_THREAD_NUM = 1
-
-# 存储线程
-STORAGE_THREAD_NUM = 1
+# 线程数
+THREAD_NUM = 1
 
 # 下载任务重试次数
 RETRY_TIMES = 0
