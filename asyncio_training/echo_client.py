@@ -12,7 +12,7 @@ from asyncio import tasks
 
 
 async def echo_client(message: str):
-    reader, writer = await asyncio.open_connection("localhost", 8080)
+    reader, writer = await asyncio.open_connection("192.168.3.7", 8080)
 
     print(f"send message: {message}")
     writer.write(message.encode())
@@ -28,7 +28,7 @@ async def echo_client(message: str):
 
 async def test():
     tasks = []
-    for i in range(10000):
+    for i in range(1000):
         task = echo_client(f"hello num {i}")
         tasks.append(task)
 
