@@ -9,6 +9,7 @@ a simple echo server
 
 import asyncio
 import random
+import sys
 
 
 async def handle(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
@@ -42,4 +43,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("shutdown server", file=sys.stderr)
