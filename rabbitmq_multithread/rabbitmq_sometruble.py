@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
+# 放弃这种方法
+# 见rabbitmq_multithread_test.py
+
 
 from time import sleep
 import logging

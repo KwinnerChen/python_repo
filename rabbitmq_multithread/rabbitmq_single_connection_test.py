@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 
+# 放弃这种方法
+# 件rabbitmq_multithread_test.py
+
+
 import pika
 from threading import Thread, current_thread
 from time import sleep
