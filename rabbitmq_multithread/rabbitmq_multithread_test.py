@@ -12,17 +12,15 @@
 import time
 import pika
 import random
-from pika.adapters.blocking_connection import BlockingConnection
 from pika.adapters.blocking_connection import BlockingChannel
 from pika import logging
 from concurrent.futures import ThreadPoolExecutor
 import functools
-import os
 
 
 # 限定线程池中的线程数
 # 同时同步设置rabbitmq的prefetch_count参数等同于线程数
-SIZE = os.cpu_count() + 4
+SIZE = 32
 
 
 class Publish:
@@ -44,7 +42,7 @@ class Publish:
         channel = self.__channel()
         self.declare_queue(channel, "test")
 
-        for i in range(100):
+        for i in range(1000):
             channel.basic_publish(
                 '',
                 'test',
@@ -78,7 +76,8 @@ class ThreadConsumer:
 
     # 工作线程的主函数
     def __worker(self, channel: BlockingChannel, tag: int, body: bytes):
-        time.sleep(random.randint(2,5))
+        # 模拟一个工作负载
+        time.sleep(random.random()*2)
         print(body)
         # 添加消息确认，以便消息消费的继续
         # 从主线程外的线程添加
@@ -106,7 +105,7 @@ class ThreadConsumer:
 
 
 if __name__ == "__main__":
-    # publish = Publish()
-    # publish.publish_message()
+    publish = Publish()
+    publish.publish_message()
     consumer = ThreadConsumer()
     consumer.consume()
