@@ -96,7 +96,7 @@ class ThreadConsumer:
                 print(method_fram, properties, body)
                 self.tpool.submit(self.__worker, channel, method_fram.delivery_tag, body)
         except KeyboardInterrupt:
-            pass
+            channel.cancel()
 
     def __del__(self):
         # 在所有线程完成后在关闭rabbitmq的链接
