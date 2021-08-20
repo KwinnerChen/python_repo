@@ -35,15 +35,13 @@ STORAGE_CONFIG = {
 
 QUEUE_MODUL = 'base.queues.Rabbitmq'
 
-# 队列地址
+# rabbitmq队列配置
 QUEUE_CONFIG = {
-    # 'host': 'localhost',
-    # 'port': 10000,
-    # 'authkey':b'spider',
     'host': '192.168.3.30',
     'port': 5672,
     'username': 'admin',
     'password': '880326',
+    'vhost': '/',
 }
 
 # 下载延时，针对线程

@@ -10,11 +10,13 @@ import pika
 import pickle
 import time
 from pika import BasicProperties
-from pika.exceptions import ConnectionClosedByBroker, ChannelClosedByBroker
+from pika.exceptions import AMQPChannelError, ChannelClosed, ConnectionClosedByBroker, ChannelClosedByBroker, AMQPConnectionError, ConnectionClosed
+from pika.exchange_type import ExchangeType
 
 
 class RabbitMQ:
     """
+    该类中大部分方法只是pika的简单包装，可以通过channel方法获取channel后使用pika的原生操作。
     此队列使用了阻塞链接，非线程安全类型，每个实例都将创建一个链接和一个通道。且没有提供常规队列的get，而是通过一个迭代器来消费队列。
     通过publish来发布消息到队列。队列中的消息是pickle打包的二进制字节对象。
     建议使用方法是在主线程获取消息，但是为了不阻塞住线程，将消息处理传给其他线程，并通过add_callback_threadsafe安全添加消息的交付确认：
@@ -28,7 +30,7 @@ class RabbitMQ:
         for method, properties, body in channel().consume():
             Thread(target=ack, args=(conn, channel, method, body)).start()
     """
-    def __init__(self, username="guest", password="guest", *, host="127.0.0.1", port=5672, virtual_host="/") -> None:
+    def __init__(self, username="guest", password="guest", *, host="127.0.0.1", port=5672, vhost="/") -> None:
         """
         本类型只提供了RabbitMQ的最基本的自定义参数，其余参数都使用了其默认值。
         """
@@ -37,7 +39,7 @@ class RabbitMQ:
         self.host = host
         self.port = port
         self.__cred = pika.PlainCredentials(username, password)
-        self.__con_params = pika.ConnectionParameters(host, port, virtual_host=virtual_host, credentials=self.__cred)
+        self.__con_params = pika.ConnectionParameters(host, port, virtual_host=vhost, credentials=self.__cred)
         self.__connection = None
         self.__channel = None
         self.__connecting = False  # 是否有链接正在进行的指示
@@ -58,7 +60,7 @@ class RabbitMQ:
                     self.__connecting = False
                 except (KeyboardInterrupt, ConnectionClosedByBroker):
                     self.__connecting = False
-                except Exception as e:
+                except (ConnectionClosed, AMQPConnectionError) as e:
                     time.sleep(retry_delay)
                     continue
         return self.__connection
@@ -78,7 +80,7 @@ class RabbitMQ:
                     self.__channeling = False
                 except (KeyboardInterrupt, ChannelClosedByBroker):
                     self.__channeling = False
-                except Exception as e:
+                except (ChannelClosed, AMQPChannelError) as e:
                     time.sleep(retry_delay)
                     continue
         return self.__channel
@@ -91,7 +93,7 @@ class RabbitMQ:
         """
         self.__connection.add_callback_threadsafe(callback)
 
-    def declare_exchange(self, exname):
+    def declare_exchange(self, exname, extype=ExchangeType.direct, durable=False):
         """
         创建一个名为exname的direct类型的交换机，只有特定需要时才需要创建，
         否则使用默认交换机。返回spec.Exchange.DeclareOk。
@@ -100,7 +102,7 @@ class RabbitMQ:
         # 每个队列都会默认绑定默认交换机
         if exname == "":
             return
-        return self.__channel.exchange_declare(exname)
+        return self.__channel.exchange_declare(exname, exchange_type=extype, durable=durable)
 
     def declare_queue(self, qname, *, exname="", routing_key=None, durable=False):
         """
