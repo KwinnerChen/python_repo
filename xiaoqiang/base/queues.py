@@ -61,6 +61,7 @@ class RabbitMQ:
                 except Exception as e:
                     time.sleep(retry_delay)
                     continue
+        return self.__connection
 
     def channel(self, retry_delay=3):
         """
@@ -80,6 +81,7 @@ class RabbitMQ:
                 except Exception as e:
                     time.sleep(retry_delay)
                     continue
+        return self.__channel
 
     def add_callback_threadsafe(self, callback):
         """
