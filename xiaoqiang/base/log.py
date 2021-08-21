@@ -8,6 +8,7 @@ __author__ = 'Kwinner Chen'
 from logging.handlers import TimedRotatingFileHandler
 import logging
 import os.path
+from os import mkdir
 
 
 __log_file_path = os.path.join(os.getcwd(), 'log')
@@ -21,9 +22,11 @@ class Logger(object):
 
     def __init__(self, logfile_name: str) -> None:
         logfile_name = os.path.join(__log_file_path, logfile_name)
-        self.__init_a_logger(logfile_name)
+        if not os.path.exists(__log_file_path):
+            mkdir(__log_file_path)
+        if not self.logger.hasHandlers():
+            self.__init_a_logger(logfile_name)
 
-    @classmethod
     def __init_a_logger(cls, logfile_name) -> None:
         sh = logging.StreamHandler()
         sh.setLevel(logging.DEBUG)
