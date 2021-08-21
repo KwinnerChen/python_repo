@@ -20,21 +20,13 @@ class Task:
         self.times = times
         self.delayitem = delayitem
         self.kwargs = kwargs
-        # for k,v in kwargs.items():
-        #     self.__setattr__(k, v)
-
-    def __getattr__(self, name):
-        try:
-            return self.name
-        except:
-            return None
 
     def __setattr__(self, name, value):
-        if not hasattr(self, name):
-            raise AttributeError("%s属性未定义，不可随意添加！")
+        if name not in {"url", "method", "callback", "times", "delayitem", "kwargs"}:
+            raise AttributeError(f"<{name}>属性未定义，不可随意添加！")
         super().__setattr__(name, value)
 
     def __repr__(self):
-        return str(self.__dict__)
+        return f"Task<url:{self.url}, method:{self.method}, callback:{self.callback}, times:{self.times}, delayitem:{self.delayitem}, kwargs:{self.kwargs}>"
 
     __str__ = __repr__
