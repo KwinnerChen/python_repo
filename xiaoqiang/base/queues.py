@@ -30,7 +30,7 @@ class RabbitMQ:
         for method, properties, body in channel().consume():
             Thread(target=ack, args=(conn, channel, method, body)).start()
     """
-    def __init__(self, username="guest", password="guest", *, host="127.0.0.1", port=5672, vhost="/") -> None:
+    def __init__(self, username="guest", password="guest", *, host="127.0.0.1", port=5672, vhost="/", durable=False) -> None:
         """
         本类型只提供了RabbitMQ的最基本的自定义参数，其余参数都使用了其默认值。
         """
@@ -38,6 +38,7 @@ class RabbitMQ:
         self.password = password
         self.host = host
         self.port = port
+        self.durable = durable
         self.__cred = pika.PlainCredentials(username, password)
         self.__con_params = pika.ConnectionParameters(host, port, virtual_host=vhost, credentials=self.__cred)
         self.__connection = None
@@ -93,7 +94,7 @@ class RabbitMQ:
         """
         self.__connection.add_callback_threadsafe(callback)
 
-    def declare_exchange(self, exname, extype=ExchangeType.direct, durable=False):
+    def declare_exchange(self, exname, extype=ExchangeType.direct):
         """
         创建一个名为exname的direct类型的交换机，只有特定需要时才需要创建，
         否则使用默认交换机。返回spec.Exchange.DeclareOk。
@@ -102,9 +103,9 @@ class RabbitMQ:
         # 每个队列都会默认绑定默认交换机
         if exname == "":
             return
-        return self.__channel.exchange_declare(exname, exchange_type=extype, durable=durable)
+        return self.__channel.exchange_declare(exname, exchange_type=extype, durable=self.durable)
 
-    def declare_queue(self, qname, *, exname="", routing_key=None, durable=False):
+    def declare_queue(self, qname, *, exname="", routing_key=None):
         """
         队列声明，创建不存在的指定名称队列，可以是空字符串，此时队列名称为服务器创建。
         返回值为rabbitmq的spec.Queue.DeclareOk，包含队列名称。
@@ -116,7 +117,7 @@ class RabbitMQ:
         :routing_key: 路由键，str，默认None，同qname相同；
         :durable: 队列持久化，bool，默认False；
         """
-        queue_name = self.__channel.queue_declare(qname, durable=durable).method.queue
+        queue_name = self.__channel.queue_declare(qname, durable=self.durable).method.queue
         # 非默认交换机时需要绑定
         if exname != "":
             self.__channel.queue_bind(queue_name, exname, routing_key)
@@ -162,7 +163,7 @@ class RabbitMQ:
         """
         self.__channel.basic_nack(delivery_tag=delivery_tag, requeue=requeue)
 
-    def publish(self, body, routing_key, *, exname="", properties=BasicProperties(delivery_mode=2)):
+    def publish(self, body, routing_key, *, exname=""):
         """
         发布消息到指定队列。默认使用默认交换机并进行消息持久化。
         :params:
@@ -171,6 +172,11 @@ class RabbitMQ:
         :exname: 交换机名称，默认使用默认交换机
         :properties: 消息属性，是BasicPorperties实例，默认进行消息持久化
         """
+        if self.durable:
+            properties = BasicProperties(delivery_mode=2)
+        else:
+            properties = None
+
         self.__channel.basic_publish(
             exchange=exname,
             routing_key=routing_key,
