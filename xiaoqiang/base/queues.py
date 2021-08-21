@@ -113,10 +113,11 @@ class RabbitMQ:
         :qname: 队列名，str；
         :qname: 队列名，str；
         :exname: 交换机名，str；
-        :routing_key: 路由键，str，默认None；
+        :routing_key: 路由键，str，默认None，同qname相同；
         :durable: 队列持久化，bool，默认False；
         """
         queue_name = self.__channel.queue_declare(qname, durable=durable).method.queue
+        # 非默认交换机时需要绑定
         if exname != "":
             self.__channel.queue_bind(queue_name, exname, routing_key)
         return queue_name
@@ -186,3 +187,12 @@ class RabbitMQ:
         :qname: 队列名称，str
         """
         return self.__channel.basic_get(qname)
+
+    def close(self):
+        self.__connection.close()
+
+    def __del__(self):
+        try:
+            self.close()
+        except ConnectionClosed:
+            pass
