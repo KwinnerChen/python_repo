@@ -5,46 +5,77 @@
 __author__ = 'Kwinner Chen'
 
 
+from collections import defaultdict
+
 import requests
-from .configmodul import Config
+
+from base.task import Task
 
 
 class Donlowder:
     '''
-    下载器，实例化需定义是否需要代理池
+    下载器，完成Task对象规定的下载任务。
     '''
     
-    def __init__(self, session=False, ippool=None):
-        self.ippool = ippool
+    def __init__(self, *, session=False, max_retry=0, mdws=[]):
+        """
+        :params:
+        :session: bool, 是否使用Session会话；
+        :max_retry: int, 错误重试次数，<0不限次数，==0默认值只请求一次，>0则重试相应次数；
+        :mdws: list， 请求中间件，在发送请求前预先处理请求任务，例如使用IP代理。
+        """
         self.session = requests.Session() if session else requests
+        self.max_retry = max_retry
+        self.mdws = mdws
+        self.__retry_times_map = defaultdict(int)
 
     def get_page(self, task):
-        assert self.__check_task(task), "重试已超过限定次数！"
-        url = task.url
+        task_hash = hash(task)
+        assert self.__check_task(task, task_hash), "重试已超过限定次数！"
+        task = self.__mdws_process(task)
         method = task.method
-        kwargs = task.kwargs
+
         if method.low() == 'get':
-            try:
-                resp = self.session.get(url=url, **kwargs, proxies=self.ippool.getip() if self.ippool else None)
-                resp.raise_for_status
-                task.response = resp
-                return task, None
-            except Exception as e:
-                task.times+=1
-                return task, e
+            return self.get(task, task_hash)
         elif method.low() == 'post':
-            try:
-                resp = self.session.post(url=url, **kwargs, proxies=self.ippool.getip() if self.ippool else None)
-                resp.raise_for_status
-                task.response = resp
-                return task, None
-            except Exception as e:
-                task.times += 1
-                return task, e
+            return self.post(task, task_hash)
+
+    def get(self, task:Task, task_hash):
+        try:
+            resp = self.session.get(url=task.url, **task.kwargs)
+            resp.raise_for_status()
+            if task.delayitem:
+                resp.delayitem = task.delayitem
+            return resp, None
+        except Exception as e:
+            self.__retry_times_map[task_hash] += 1
+            return None, e
+        
+    def post(self, task:Task, task_hash):
+        try:
+            resp = self.session.post(url=task.url, **task.kwargs)
+            resp.raise_for_status()
+            if task.delayitem:
+                resp.delayitem = task.delayitem
+            return resp, None
+        except Exception as e:
+            self.__retry_times_map[task_hash] += 1
+            return None, e
+
+    def __mdws_process(self, task):
+        for mdw in self.mdws:
+            task = mdw.process(task)
+        return task
                 
-    def __check_task(self, task):
-        _times = getattr(task, 'times', 0)
-        if _times>Config.RETRY_TIMES.value:
-            return 0
+    def __check_task(self, task:Task, task_hash):
+        if task.times == 0:
+            if self.__retry_times_map[task_hash] <= self.max_retry:
+                return True
+            else:
+                return False
         else:
-            return 1
+            if self.__retry_times_map[task_hash] <= task.times:
+                return True
+            else:
+                return False
+
