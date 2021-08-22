@@ -195,6 +195,7 @@ class RabbitMQ:
         return self.__channel.basic_get(qname)
 
     def close(self):
+        self.__channel.cancel()
         self.__connection.close()
 
     def __del__(self):
