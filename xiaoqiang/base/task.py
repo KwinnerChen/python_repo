@@ -3,21 +3,21 @@
 
 
 class Task:
-    def __init__(self, url, *, method='get', callback=None, times=0, delayitem=None, **kwargs):
+    def __init__(self, url, *, method='get', callback=None, delayitem=None, **kwargs):
         '''
         自定义任务对象，在爬虫任务流中流动。
         :params:
         :url: 请求访问链接；
         :method: 请求访问方法，默认为get请求；
         :callback: 回调函数，用于解析response响应对象；
-        :times: 请求次数标记，如果值为0之外的数字，该参数将覆盖下载器中配置的请求次数；
         :delayitem: 存放缓存，用于多步解析的item；
         :kwargs: 该参数将传递给下载器；
         '''
         self.url = url
         self.method = method
         self.callback = callback
-        self.times = times
+        # 任务重试次数标记
+        self.times = 0
         self.delayitem = delayitem
         self.kwargs = kwargs
 
