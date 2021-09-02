@@ -7,16 +7,18 @@ __author__ = 'Kwinner Chen'
 
 import os
 import abc
-import re
 from base.item import ItemBase
 from threading import RLock
+try:
+    from dbutils.pooled_db import PooledDB
+except ImportError:
+    from DBUtils.PooledDB import PooledDB
 
 
 class DBBase(abc.ABC):
     DBPOOL = None
 
     def __new__(cls, storageconf):
-        from DBUtils.PooledDB import PooledDB
         if cls.__name__ == 'Mysql':
             import pymysql as creator
         elif cls.__name__ == 'Oracle':
@@ -35,6 +37,7 @@ class DBBase(abc.ABC):
     def save(self, item, tablename):
         con = self.DBPOOL.connection()
         cur = con.cursor()
+        r = 0
         try:
             if isinstance(item, (ItemBase, dict)):
                 r = self.saveone(cur, item, tablename)
