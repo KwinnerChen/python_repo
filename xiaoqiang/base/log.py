@@ -13,12 +13,18 @@ from monitor import Email
 from configmodul import Config
 
 
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARNING = logging.WARNING
+ERROR = logging.ERROR
+
+
 class Logger(object):
     """
         用于日志记录！每日一个日志文件。多线程可用，多进程会造成日志文件混乱丢失。
     """
 
-    def __init__(self, logfile_name: str, logger_name=__name__, notifier:Email=None, notify_level=logging.WARNING) -> None:
+    def __init__(self, logfile_name: str, logger_name=__name__, notifier:Email=None, notify_level=WARNING) -> None:
         """
         初始化一个日志记录器。线程安全，多进程时应考虑日志文件是否会混乱。notifier是一个用于事件提醒的类或者该类的实例，
         提醒等级notify_level默认为logging.WARNING。当使用方法高于该等级时会进行事件通知。
@@ -31,9 +37,9 @@ class Logger(object):
         """
         self.logger = logging.getLogger(logger_name)
         if Config.DEBUG.value:
-            self.logger.setLevel(logging.DEBUG)
+            self.logger.setLevel(DEBUG)
         else:
-            self.logger.setLevel(logging.INFO)
+            self.logger.setLevel(INFO)
 
         logfile_name = os.path.join(Config.LOG_FILE_PATH.value, logfile_name)
         if not os.path.exists(Config.LOG_FILE_PATH.value):
@@ -51,9 +57,9 @@ class Logger(object):
         终端输出等级为DEBUG，文件输出等级为WARNING。
         """
         sh = logging.StreamHandler()
-        sh.setLevel(logging.DEBUG)
+        sh.setLevel(DEBUG)
         fh = TimedRotatingFileHandler(filename=logfile_name, when="D", backupCount=30)
-        fh.setLevel(logging.WARNING)
+        fh.setLevel(WARNING)
         fmt_fh = logging.Formatter(r"%(actime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s")
         fmt_sh = logging.Formatter(r"%(actime)s - %(levelname)s - %(message)s")
         sh.setFormatter(fmt_sh)
@@ -71,20 +77,20 @@ class Logger(object):
 
     def info(self, msg: str) -> None:
         self.logger.info(msg)
-        if self.notifer and self.notify_level <= logging.INFO:
+        if self.notifer and self.notify_level <= INFO:
             self.__notify(msg)
 
     def debug(self, msg: str) -> None:
         self.logger.debug(msg)
-        if self.notifer and self.notify_level <= logging.DEBUG:
+        if self.notifer and self.notify_level <= DEBUG:
             self.__notify(msg)
 
     def warning(self, msg: str) -> None:
         self.logger.warning(msg)
-        if self.notifer and self.notify_level <= logging.WARNING:
+        if self.notifer and self.notify_level <= WARNING:
             self.__notify(msg)
 
     def error(self, msg: str) -> None:
         self.logger.error(msg)
-        if self.notifer and self.notify_level <= logging.ERROR:
+        if self.notifer and self.notify_level <= ERROR:
             self.__notify(msg)
