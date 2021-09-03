@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+from collections import namedtuple
 import re
 try:
     import config
@@ -10,27 +11,7 @@ except ImportError:
 from base import configglobal
 
 
-class ConfigValue:
-    """配置属性和值对象"""
-    def __init__(self, name, value):
-        self.__name = name
-        self.__value = value
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def value(self):
-        return self.__value
-
-    def __setattr__(self, name, value):
-        if hasattr(self, name):
-            raise Exception("实例后不能赋值操作！")
-        super().__setattr__(name, value)
-
-    def __str__(self):
-        return f'<ConfigValue(name={self.__name}, value={self.__value})>'
+ConfigValue = namedtuple("ConfigValue", "name value")
 
 
 class ConfigMeta(type):
