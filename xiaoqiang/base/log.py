@@ -48,7 +48,7 @@ class Logger(object):
         
         notifier = import_module(Config.NOTIFIER)
         if callable(notifier):
-            notifier = notifier(**Config.NOTIFIER_CONFIG)
+            notifier = notifier(Config)
         self.notifier = notifier
 
     def __init_a_logger(self, logfile_name) -> None:
