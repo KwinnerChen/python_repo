@@ -18,21 +18,21 @@ except ImportError:
 class DBBase(abc.ABC):
     DBPOOL = None
 
-    def __new__(cls, storageconf):
+    def __new__(cls, config):
         if cls.__name__ == 'Mysql':
             import pymysql as creator
         elif cls.__name__ == 'Oracle':
             import cx_Oracle as creator
 
         if not cls.DBPOOL:
-            cls.DBPOOL = PooledDB(creator, **(storageconf.value))
+            cls.DBPOOL = PooledDB(creator, maxconnections=config.THREAD_NUM, **config.STORAGE_CONFIG)
 
-        return object.__new__(cls)
+        return super().__new__(cls)
 
-    def __init__(self, storageconf):
-        for k, v in storageconf.value.items():
+    def __init__(self, config):
+        self.config = config
+        for k, v in config.STORAGE_CONFIG.items():
             setattr(self, k, v)
-        # self.type = storageconf.value['type']
  
     def save(self, item, tablename):
         con = self.DBPOOL.connection()
@@ -115,58 +115,58 @@ class Oracle(DBBase):
         return r
 
 
-class Local:
-    __lock = RLock()
+# class Local:
+#     __lock = RLock()
 
-    def __init__(self, storageconf):
-        self.__count = 1
-        for k, v in storageconf.value.items():
-            setattr(self, k, v)
-        # self.type = storageconf.value['type']
-        self.__check_path()
+#     def __init__(self, storageconf):
+#         self.__count = 1
+#         for k, v in storageconf.value.items():
+#             setattr(self, k, v)
+#         # self.type = storageconf.value['type']
+#         self.__check_path()
 
-    def __valid_filename(self, filename):
-        if not filename:
-            return self.filename
-        if not filename.endswith('.txt'):
-            filename += '.txt'
-            return filename
+#     def __valid_filename(self, filename):
+#         if not filename:
+#             return self.filename
+#         if not filename.endswith('.txt'):
+#             filename += '.txt'
+#             return filename
 
-    def __check_filesize(self, filename):
-        if not os.path.exists(os.path.join(self.file_path, filename)):
-            return filename
-        if os.path.getsize(os.path.join(self.file_path, filename))>104857600:
-            filename = filename.splie('.')[0] + self.__count
-            self.__count += 1
-            return filename + '.txt'
-        else:
-            return filename
+#     def __check_filesize(self, filename):
+#         if not os.path.exists(os.path.join(self.file_path, filename)):
+#             return filename
+#         if os.path.getsize(os.path.join(self.file_path, filename))>104857600:
+#             filename = filename.splie('.')[0] + self.__count
+#             self.__count += 1
+#             return filename + '.txt'
+#         else:
+#             return filename
 
-    def __check_path(self):
-        try:
-            os.makedirs(self.file_path)
-        except IOError:
-            pass
+#     def __check_path(self):
+#         try:
+#             os.makedirs(self.file_path)
+#         except IOError:
+#             pass
 
-    def save(self, item, filename=None):
-        filename = self.__check_filesize(self.__valid_filename(filename))
-        self.filename = filename
-        count = 0
-        self.__lock.acquire()
-        try:
-            with open(os.path.join(self.file_path, self.filename), mode=self.mode, encoding=self.encoding) as f:
-                if isinstance(item, ItemBase):
-                    f.write(str(item)+'\n')
-                    count += 1
-                elif isinstance(item, (list, tuple)):
-                    for i in item:
-                        f.write(str(i) + '\n')
-                        count += 1
-        finally:
-            self.__lock.release()
+#     def save(self, item, filename=None):
+#         filename = self.__check_filesize(self.__valid_filename(filename))
+#         self.filename = filename
+#         count = 0
+#         self.__lock.acquire()
+#         try:
+#             with open(os.path.join(self.file_path, self.filename), mode=self.mode, encoding=self.encoding) as f:
+#                 if isinstance(item, ItemBase):
+#                     f.write(str(item)+'\n')
+#                     count += 1
+#                 elif isinstance(item, (list, tuple)):
+#                     for i in item:
+#                         f.write(str(i) + '\n')
+#                         count += 1
+#         finally:
+#             self.__lock.release()
 
-        return count
+#         return count
 
-    def close(self):
-        # 此方法只是为了和数据库接口统一
-        pass
+#     def close(self):
+#         # 此方法只是为了和数据库接口统一
+#         pass
