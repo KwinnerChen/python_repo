@@ -13,6 +13,9 @@ import json
 
 
 class Notifier(abc.ABC):
+    def __init__(self, config) -> None:
+        self.config = config
+
     @abc.abstractmethod
     def notify(self, message: str):
         """
@@ -22,11 +25,12 @@ class Notifier(abc.ABC):
 
 class Email(Notifier):
 
-    def __init__(self, addr, port, user, password) -> None:
-        self. addr = addr
-        self.user = user
-        self.passworld = password
-        self.port = port
+    def __init__(self, config) -> None:
+        super().__init__(config)
+        self.user = config.NOTIFIER_CONFIG['user']
+        self.password = config.NOTIFIER_CONFIG['password']
+        self.addr = config.NOTIFIER_CONFIG['addr']
+        self.port = config.NOTIFIER_CONFIG['port']
 
     @staticmethod
     def __get_receivers():
@@ -40,7 +44,7 @@ class Email(Notifier):
         contacts = self.__get_receivers()
 
         with smtplib.SMTP(self.addr, self.port) as smtp:
-            smtp.login(self.user, self.passworld)
+            smtp.login(self.user, self.password)
             return smtp.sendmail(
                 self.user,
                 contacts,
