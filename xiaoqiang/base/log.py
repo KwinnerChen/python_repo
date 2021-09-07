@@ -5,11 +5,11 @@
 __author__ = 'Kwinner Chen'
 
 
+from base.utils import import_module
 from logging.handlers import TimedRotatingFileHandler
 import logging
 import os.path
 from os import mkdir
-from monitor import Email
 from configmodul import Config
 
 
@@ -24,7 +24,7 @@ class Logger(object):
         用于日志记录！每日一个日志文件。多线程可用，多进程会造成日志文件混乱丢失。
     """
 
-    def __init__(self, logfile_name: str, logger_name=__name__, notifier:Email=None, notify_level=WARNING) -> None:
+    def __init__(self, logfile_name: str, logger_name=__name__) -> None:
         """
         初始化一个日志记录器。线程安全，多进程时应考虑日志文件是否会混乱。notifier是一个用于事件提醒的类或者该类的实例，
         提醒等级notify_level默认为logging.WARNING。当使用方法高于该等级时会进行事件通知。
@@ -32,24 +32,24 @@ class Logger(object):
         :params:
         :logfile_name: str, 日志文件名，线程安全。但是多进程时考虑文件会混乱。
         :logger_name: str, 记录器名称。同logging模块中的Logger。以当前模块名称命名。
-        :notifier: Notifier的子类或者其实例，默认为None。
-        :notify_level: 事件通知等级，高于此等级才进行通知，默认logging.WARNING。
         """
         self.logger = logging.getLogger(logger_name)
-        if Config.DEBUG.value:
+        if Config.DEBUG:
             self.logger.setLevel(DEBUG)
         else:
             self.logger.setLevel(INFO)
 
-        logfile_name = os.path.join(Config.LOG_FILE_PATH.value, logfile_name)
-        if not os.path.exists(Config.LOG_FILE_PATH.value):
-            mkdir(Config.LOG_FILE_PATH.value)
+        logfile_name = os.path.join(Config.LOG_FILE_PATH, logfile_name)
+        if not os.path.exists(Config.LOG_FILE_PATH):
+            mkdir(Config.LOG_FILE_PATH)
 
         if not self.logger.hasHandlers():
             self.__init_a_logger(logfile_name)
-
-        self.notifer = notifier() if callable(notifier) else notifier
-        self.notify_level = notify_level
+        
+        notifier = import_module(Config.NOTIFIER)
+        if callable(notifier):
+            notifier = notifier(**Config.NOTIFIER_CONFIG)
+        self.notifier = notifier
 
     def __init_a_logger(self, logfile_name) -> None:
         """
@@ -75,22 +75,22 @@ class Logger(object):
         else:
             self.logger.warning(f"事件通知可能部分错误，错误原因：{senderr}")
 
-    def info(self, msg: str) -> None:
+    def info(self, msg: str, notify=False) -> None:
         self.logger.info(msg)
-        if self.notifer and self.notify_level <= INFO:
+        if self.notifer and notify:
             self.__notify(msg)
 
-    def debug(self, msg: str) -> None:
+    def debug(self, msg: str, notify=False) -> None:
         self.logger.debug(msg)
-        if self.notifer and self.notify_level <= DEBUG:
+        if self.notifer and notify:
             self.__notify(msg)
 
-    def warning(self, msg: str) -> None:
+    def warning(self, msg: str, notify=True) -> None:
         self.logger.warning(msg)
-        if self.notifer and self.notify_level <= WARNING:
+        if self.notifer and notify:
             self.__notify(msg)
 
-    def error(self, msg: str) -> None:
+    def error(self, msg: str, notify=True) -> None:
         self.logger.error(msg)
-        if self.notifer and self.notify_level <= ERROR:
+        if self.notifer and notify:
             self.__notify(msg)
