@@ -6,7 +6,7 @@ try:
     import config
 except ImportError:
     pass
-from base import configglobal
+import configglobal
 
 
 # ConfigValue = namedtuple("ConfigValue", "name value")

@@ -2,7 +2,7 @@
 
 
 from abc import ABC, abstractmethod
-from base.task import Task
+from task import Task
 
 
 class MiddleWare(ABC):

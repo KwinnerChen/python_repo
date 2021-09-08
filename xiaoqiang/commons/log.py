@@ -5,7 +5,7 @@
 __author__ = 'Kwinner Chen'
 
 
-from base.utils import import_module
+from utils import import_module
 from logging.handlers import TimedRotatingFileHandler
 import logging
 import os.path

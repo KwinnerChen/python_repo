@@ -5,10 +5,8 @@
 __author__ = 'Kwinner Chen'
 
 
-import os
 import abc
-from base.item import ItemBase
-from threading import RLock
+from item import ItemBase
 try:
     from dbutils.pooled_db import PooledDB
 except ImportError:

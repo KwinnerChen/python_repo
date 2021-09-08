@@ -5,11 +5,10 @@
 __author__ = 'Kwinner Chen'
 
 
-from collections import defaultdict
-
+from log import Logger
 import requests
-
-from base.task import Task
+from task import Task
+from utils import import_module
 
 
 class Donlowder:
@@ -27,6 +26,7 @@ class Donlowder:
         self.session = requests.Session() if session else requests
         self.max_retry = max_retry
         self.mdws = mdws
+        self.logger = Logger(self.__class__.__name__)
 
     def get_page(self, task):
         if self.max_retry < 0:

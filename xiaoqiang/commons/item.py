@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from base.models import Field
+from models import Field
 from typing import Iterable
 
 

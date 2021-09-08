@@ -13,27 +13,16 @@ RETRY_TIMES = 0
 # 此变量为了将来可扩展自定义数据库存储模块
 # 注册自定存储模块的饮用路径，字符串
 # 自定义存储模块必须实现save和close接口
-STORAGE_MODUL = 'base.dbs.Local'
+STORAGE_MODUL = None
 
 # 存储配置
 STORAGE_CONFIG = {
-    'file_path': os.path.join(os.getcwd(), 'files'),
-    'mode': 'a+',
-    'encoding': 'utf-8',
-    'size': '100M',
-    'filename': 'spider_file.txt'
+    'host': 'localhost',
+    'port': int,
+    'username': '',
+    'password': '',
+    'db': '',
 }
-# STORAGE_CONFIG = {
-#     'type': 'mysql',
-    # 'host': 'localhost',
-    # 'port': int,
-    # 'username': '',
-    # 'password': '',
-    # 'db': '',
-    # 'tablename': '',
-# }
-
-QUEUE_MODUL = 'base.queues.Rabbitmq'
 
 # rabbitmq队列配置
 QUEUE_CONFIG = {
@@ -49,3 +38,26 @@ DELAY = 0
 
 # 一个爬虫注册容器，所有爬虫需要再次注册
 SPIDERS = []
+
+# 默认值为True，将显示更多细节
+DEBUG = True
+
+# 日志文件路径
+LOG_FILE_PATH = os.path.join(os.getcwd(), 'logs')
+
+# 请求中间件
+MIDDLEWARE = []
+
+# 事件通知
+NOTIFIER = None
+
+# 事件通知服务配置
+NOTIFIER_CONFIG = {
+
+}
+
+# 使用的执行器
+EXECUTOR = None
+
+# 下载器
+DOWNLOADER = None
